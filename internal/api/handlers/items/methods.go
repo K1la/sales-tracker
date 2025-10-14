@@ -1,7 +1,9 @@
 package items
 
 import (
+	"errors"
 	"github.com/K1la/sales-tracker/internal/dto"
+	itemRepo "github.com/K1la/sales-tracker/internal/repository/items"
 	"github.com/gin-gonic/gin"
 	"github.com/wb-go/wbf/ginext"
 	"net/http"
@@ -11,19 +13,19 @@ import (
 func (h *Handler) Create(c *ginext.Context) {
 	var req dto.CreateItem
 	if err := c.ShouldBindJSON(&req); err != nil {
-		h.log.Error().Err(err).Msg("failed to bind create item request")
+		h.log.Error().Err(err).Msg("failed to bind create items request")
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	h.log.Info().Interface("item", req).Msg("parsed create item")
+	h.log.Info().Interface("items", req).Msg("parsed create items")
 
 	item, err := h.service.Create(c.Request.Context(), req)
 	if err != nil {
-		h.log.Error().Err(err).Msg("failed to create item from service")
+		h.log.Error().Err(err).Msg("failed to create items from service")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	h.log.Info().Interface("item", item).Msg("created item")
+	h.log.Info().Interface("items", item).Msg("created items")
 	c.JSON(http.StatusOK, item)
 }
 
@@ -51,7 +53,12 @@ func (h *Handler) GetByID(c *ginext.Context) {
 
 	item, err := h.service.GetByID(c.Request.Context(), id)
 	if err != nil {
-		h.log.Error().Err(err).Msg("failed to get item from service")
+		if errors.Is(err, itemRepo.ErrItemNotFound) {
+			h.log.Error().Err(err).Msg("item not found")
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		h.log.Error().Err(err).Msg("failed to get items from service")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -65,14 +72,19 @@ func (h *Handler) Update(c *ginext.Context) {
 
 	var req dto.UpdateItem
 	if err := c.ShouldBindJSON(&req); err != nil {
-		h.log.Error().Err(err).Msg("failed to bind update item request")
+		h.log.Error().Err(err).Msg("failed to bind update items request")
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	item, err := h.service.Update(c.Request.Context(), id, req)
 	if err != nil {
-		h.log.Error().Err(err).Msg("failed to update item from service")
+		if errors.Is(err, itemRepo.ErrItemNotFound) {
+			h.log.Error().Err(err).Msg("item not found")
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		h.log.Error().Err(err).Msg("failed to update items from service")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -84,7 +96,7 @@ func (h *Handler) Delete(c *ginext.Context) {
 	id := c.Param("id")
 
 	if err := h.service.Delete(c.Request.Context(), id); err != nil {
-		h.log.Error().Err(err).Msg("failed to delete item from service")
+		h.log.Error().Err(err).Msg("failed to delete items from service")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

@@ -3,13 +3,14 @@ package model
 import "time"
 
 type Item struct {
-	ID        int64
-	Type      string // income(доход) / expense(расход)
-	Amount    float64
-	Date      string
-	Category  string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID          int64
+	Type        string // income(доход) / expense(расход)
+	Amount      float64
+	Date        time.Time
+	Category    string
+	Description string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
 type Aggregated struct {

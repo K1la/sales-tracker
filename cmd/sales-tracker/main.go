@@ -1,11 +1,16 @@
 package main
 
 import (
-	"context"
+	analyticsHandler "github.com/K1la/sales-tracker/internal/api/handlers/analytics"
+	itemHandler "github.com/K1la/sales-tracker/internal/api/handlers/items"
 	"github.com/K1la/sales-tracker/internal/api/router"
 	"github.com/K1la/sales-tracker/internal/api/server"
 	"github.com/K1la/sales-tracker/internal/config"
 	"github.com/K1la/sales-tracker/internal/repository"
+	analyticsRepo "github.com/K1la/sales-tracker/internal/repository/analytics"
+	itemRepo "github.com/K1la/sales-tracker/internal/repository/items"
+	analyticsService "github.com/K1la/sales-tracker/internal/service/analytics"
+	itemService "github.com/K1la/sales-tracker/internal/service/items"
 
 	"github.com/wb-go/wbf/zlog"
 	"os"
@@ -22,22 +27,22 @@ func main() {
 	cfg := config.Init()
 
 	// TODO: доделать инициализацию
-	dbItem := repository.NewDB(cfg)
-	dbAnalytics := repository.NewDB(cfg)
+	db := repository.NewDB(cfg)
 
-	repoItem := repository.New(db)
-	repoAnalytics := repository.New(db)
+	repoItem := itemRepo.New(db, lg)
+	repoAnalytics := analyticsRepo.New(db, lg)
 
-	itemService := service.New(repo)
-	analyticsService := service.New(repo)
+	serviceItem := itemService.New(repoItem, lg)
+	serviceAnalytics := analyticsService.New(repoAnalytics, lg)
 
-	itemHandler := handler.New(srvc)
-	analyticsHandler := handler.New(srvc)
-	r := router.New(hndlr)
+	handlerItem := itemHandler.New(serviceItem, lg)
+	handlerAnalytics := analyticsHandler.New(serviceAnalytics, lg)
+
+	r := router.New(handlerItem, handlerAnalytics)
 	s := server.New(cfg.HTTPServer.Address, r)
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	//ctx, cancel := context.WithCancel(context.Background())
+	//defer cancel()
 
 	// sig channel to handle SIGINT and SIGTERM for graceful shutdown
 	sigChan := make(chan os.Signal, 1)
@@ -46,7 +51,7 @@ func main() {
 	go func() {
 		sig := <-sigChan
 		zlog.Logger.Info().Msgf("recieved shutting down signal %v. Shutting down...", sig)
-		cancel()
+		//cancel()
 	}()
 
 	if err := s.ListenAndServe(); err != nil {

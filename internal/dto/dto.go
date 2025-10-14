@@ -5,26 +5,30 @@ import "time"
 // Item dto
 
 type CreateItem struct {
-	Type     string  `json:"type" binding:"required,oneof=income expense"`
-	Amount   float64 `json:"amount" binding:"required,gt=0"`
-	Date     string  `json:"date" binding:"required,datetime=2006-01-02"`
-	Category string  `json:"category" binding:"required"`
+	Type        string  `json:"type" binding:"required,oneof=income expense"`
+	Amount      float64 `json:"amount" binding:"required,gt=0"`
+	Date        string  `json:"date" binding:"required,datetime=2006-01-02"`
+	Category    string  `json:"category" binding:"required"`
+	Description string  `json:"description" binding:"omitempty,max=255"`
 }
 
 type ItemResponse struct {
-	ID        int64     `json:"id"`
-	Type      string    `json:"type"`
-	Amount    float64   `json:"amount"`
-	Date      string    `json:"date"`
-	Category  string    `json:"category"`
-	CreatedAt time.Time `json:"created_at"`
+	ID          int64     `json:"id"`
+	Type        string    `json:"type"`
+	Amount      float64   `json:"amount"`
+	Date        string    `json:"date"`
+	Category    string    `json:"category"`
+	Description string    `json:"description"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type UpdateItem struct {
-	Type     *string  `json:"type" binding:"omitempty,oneof=income expense"`
-	Amount   *float64 `json:"amount" binding:"omitempty,gt=0"`
-	Date     *string  `json:"date" binding:"omitempty,datetime=2006-01-02"`
-	Category *string  `json:"category" binding:"omitempty"`
+	Type        *string  `json:"type" binding:"omitempty,oneof=income expense"`
+	Amount      *float64 `json:"amount" binding:"omitempty,gt=0"`
+	Date        *string  `json:"date" binding:"omitempty,datetime=2006-01-02"`
+	Category    *string  `json:"category" binding:"omitempty"`
+	Description *string  `json:"description"`
 }
 
 type GetItemsParams struct {

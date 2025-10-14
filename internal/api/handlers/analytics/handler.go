@@ -11,10 +11,10 @@ type Handler struct {
 	log     zerolog.Logger
 }
 
-func New(s Service) *Handler {
-	return &Handler{service: s}
+func New(s Service, l zerolog.Logger) *Handler {
+	return &Handler{service: s, log: l}
 }
 
 type Service interface {
-	GetAnalytics(ctx context.Context, query dto.AnalyticsQuery) (*dto.AnalyticsResponse, error)
+	GetAnalytics(ctx context.Context, q dto.AnalyticsQuery) (*dto.AnalyticsResponse, error)
 }

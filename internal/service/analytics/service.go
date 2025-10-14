@@ -1,16 +1,21 @@
 package analytics
 
-import "context"
+import (
+	"context"
+	"github.com/K1la/sales-tracker/internal/dto"
+	"github.com/K1la/sales-tracker/internal/model"
+	"github.com/rs/zerolog"
+)
 
 type Service struct {
-	db Repo
+	db  Repo
+	log zerolog.Logger
 }
 
-func New(d Repo) *Service {
-	return &Service{db: d}
+func New(d Repo, l zerolog.Logger) *Service {
+	return &Service{db: d, log: l}
 }
 
 type Repo interface {
-	// TODO: дописать параметры
-	GetAnalytics(ctx context.Context)
+	GetAnalytics(ctx context.Context, q dto.AnalyticsQuery) (*model.Aggregated, error)
 }

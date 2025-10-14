@@ -1,4 +1,4 @@
-package analytics
+package items
 
 import (
 	"github.com/rs/zerolog"
