@@ -1,11 +1,12 @@
 package router
 
 import (
-	"github.com/K1la/sales-tracker/internal/api/handlers/analytics"
-	"github.com/K1la/sales-tracker/internal/api/handlers/items"
 	"net/http"
 	"path/filepath"
 	"strings"
+
+	"github.com/K1la/sales-tracker/internal/api/handlers/analytics"
+	"github.com/K1la/sales-tracker/internal/api/handlers/items"
 
 	"github.com/wb-go/wbf/ginext"
 )
@@ -28,7 +29,7 @@ func New(ih *items.Handler, ah *analytics.Handler) *ginext.Engine {
 
 		analyticsGroup := api.Group("/analytics")
 		{
-			analyticsGroup.GET("", ah.GetSummary)
+			analyticsGroup.GET("", ah.GetAnalytics)
 		}
 	}
 

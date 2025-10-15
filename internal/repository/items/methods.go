@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/K1la/sales-tracker/internal/dto"
 	"github.com/K1la/sales-tracker/internal/model"
 	"time"
@@ -39,18 +40,31 @@ func (r *Postgres) GetAll(ctx context.Context, params dto.GetItemsParams) ([]dto
 	`
 
 	args := []interface{}{}
-	conditiond := ""
-	if params.From != "" && params.To != "" {
-		conditiond = " WHERE date BETWEEN $1 AND $2"
-		args = append(args, params.From, params.To)
+	conditions := ""
+	argPos := 1
+
+	if params.From != "" {
+		conditions = fmt.Sprintf("WHERE date >= $%d", argPos)
+		args = append(args, params.From)
+		argPos++
+	}
+	if params.To != "" {
+		if conditions == "" {
+			conditions = fmt.Sprintf("WHERE date <= $%d", argPos)
+		} else {
+			conditions += fmt.Sprintf(" AND date <= $%d", argPos)
+		}
+		args = append(args, params.To)
+		argPos++
 	}
 
-	orderBy := " ORDER BY date DESC"
+	orderBy := "ORDER BY date DESC"
 	if len(params.SortBy) > 0 {
-		orderBy = " ORDER By " + params.SortBy[0]
+		orderBy = fmt.Sprintf("ORDER BY %s", params.SortBy[0])
 	}
 
-	query := baseQuery + orderBy + conditiond
+	query := fmt.Sprintf("%s %s %s", baseQuery, conditions, orderBy)
+
 	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
